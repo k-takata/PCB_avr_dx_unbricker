@@ -45,8 +45,9 @@ KiCad 10.0
 |Q1         |   1|[BSS138](https://akizukidenshi.com/catalog/g/g104232/)|Nch MOSFET|
 |Q2         |   1|[BSS84](https://akizukidenshi.com/catalog/g/g104269/) |Pch MOSFET|
 |R1         |   1|470Ω |黄紫茶金、1/4Wサイズ|
-|R2,R3,R6   |   3|4.7kΩ|黄紫赤金、1/4Wサイズ|
-|R4         |   1|10kΩ |茶黒橙金、1/4Wサイズ|
+|R2         |   1|4.7kΩ|黄紫赤金、1/4Wサイズ、LEDに合わせて値は適宜調整|
+|R3         |   1|4.7kΩ|黄紫赤金、1/4Wサイズ|
+|R4,R6      |   2|10kΩ |茶黒橙金、1/4Wサイズ|
 |R5         |   1|100kΩ|茶黒黄金、1/4Wサイズ|
 |SW1,SW2    |   2|[SS-12D00G3](https://akizukidenshi.com/catalog/g/g115707/)|スライドスイッチ 1回路2接点 基板用|
 |SW3        |   1|      |プッシュスイッチ|
