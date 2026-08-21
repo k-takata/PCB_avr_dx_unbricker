@@ -12,7 +12,10 @@ UPDI部分の回路は[SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/b
 
 ## 使用したソフトウェア
 
-KiCad 10.0
+* KiCad 10.0
+* Arduino IDE 2.3.10
+  - [DxCore](https://github.com/SpenceKonde/DxCore) 1.5.11
+  - [megaTinyCore](https://github.com/SpenceKonde/megaTinyCore) 2.6.11
 
 
 ## 回路図
@@ -30,10 +33,10 @@ KiCad 10.0
 | Reference |個数|値    | 説明 |
 |-----------|----|------|------|
 |C1,C2      |   2|0.1μF| |
-|C3,C4      |   2|1μF  |(\*1) |
+|C3,C4      |   2|1μF  |チャージポンプ用 (\*1) |
 |D1,D3,D4,D8|   1|[BAT43](https://akizukidenshi.com/catalog/g/g113907/) |適当なショットキーバリアダイオード |
 |D2         |   1|LED   |φ5mm |
-|D5         |   1|7.5V  |ツェナーダイオード (\*2) |
+|D5         |   1|[1N4737A](https://www.sengoku.co.jp/mod/sgk_cart/detail.php?code=EEHD-0FMV)|7.5Vツェナーダイオード (\*2) |
 |D6         |   1|      |ツェナーダイオード (\*2) |
 |D7         |   1|      |ツェナーダイオード (\*2) |
 |J1         |   1|      |L型ピンソケット 2x4 (\*3)、AE-CH9102F-TYPEC-BO接続用 |
@@ -57,7 +60,7 @@ KiCad 10.0
 
 (\*1) データシートでは10μFが推奨されているが、電流はほとんど使用しないので、1μFで十分。  
 (\*2) D5を単独で使用するか、D6 + D7の組み合わせで使用する。TP1の電圧が7.5V (Vdd+2.0V以上、8.5V以下)になるようにする。例えば、3.0V + 5.1Vなどの組み合わせでもよいだろう。  
-(\*3) 例えば、[L型ピンソケット 2x6](https://akizukidenshi.com/catalog/g/g116795/)を加工して使用する。  
+(\*3) 例えば、[L型ピンソケット 2x6](https://akizukidenshi.com/catalog/g/g116795/) (1個分)や[L型ピンソケット 2x15](https://akizukidenshi.com/catalog/g/g113419/) (3個分)などを加工して使用する。  
 (\*4) U1またはU2のどちらか1つを使用する。  
 (\*5) U2を使用する場合は、ATtiny402を直接載せるか、[SOP8変換基板](https://akizukidenshi.com/catalog/g/g105154)を介して載せるかのどちらかを選択する。  
 
@@ -86,6 +89,11 @@ AVR Dx/Ex Unbrickerは、AVR Dx/ExシリーズのHVプログラミングのみ�
   "30. UPDI - Unified Program and Debug Interface" や "33. Electrical Characteristics" (33.18. UPDI Timing) などを参照。
 * [AVR64DD32/28 Datasheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/AVR64DD32-28-Complete-DataSheet-DS40002315.pdf) [PDF]  
   "34. UPDI - Unified Program and Debug Interface" や "36. Electrical Characteristics" (36.18. UPDI) などを参照。
+
+
+## 動作確認済みデバイス
+
+T.B.D.
 
 
 ## 使用方法
