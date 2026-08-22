@@ -1,5 +1,11 @@
 # AVR Dx/Ex Unbricker
 
+## 3行サマリ
+
+* AVR Dx/Exシリーズ向けの7.5V系HV対応UPDIアンブリッカーです。
+* UPDI無効化デバイスにHVパルスを与えて、通常のUPDI書き込みに復帰させます。
+* ATtinyシリーズ向けの12V系HVプログラミングには対応していません。
+
 ## 概要
 
 AVR Dx/Exシリーズ用の7.5V系高電圧(HV)プログラミングに対応したUPDI (Unified Program and Debug Interface)書き込み装置です。(ATtinyシリーズの12V系HVプログラミングには対応していません。)  
@@ -10,6 +16,16 @@ AVR Dx/Exシリーズ用の7.5V系高電圧(HV)プログラミングに対応し
 UPDI部分の回路は[SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/blob/master/UPDI/jtag2updi.md)に従っています。
 
 
+## 対応範囲
+
+| 項目 | 対応状況 | 備考 |
+|------|----------|------|
+| AVR Dx/Exの7.5V HV UPDI | 対応 | RESETピンへHVパルスを印加 |
+| ATtinyの12V HV UPDI | 非対応 | UPDIピンへ12Vパルスを印加する方式 |
+| 通常のUPDI書き込み | 対応 | 書き込み装置はSerialUPDIを使用 |
+| 動作確認済みデバイス | AVR64DD28 | README作成時点 |
+
+
 ## 使用したソフトウェア
 
 * KiCad 10.0
@@ -18,14 +34,39 @@ UPDI部分の回路は[SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/b
   - [megaTinyCore](https://github.com/SpenceKonde/megaTinyCore) 2.6.11
 
 
+## クイックスタート
+
+初回のみ、先に本基板側マイコン(U1/U2)へファームウェアを書き込んでください。
+
+1. U1またはU2のどちらか一方を実装する。
+2. J1またはJ2にホスト側シリアルモジュールを接続する。
+3. J6を**FW**側に設定し、SW1を**UPDI**に設定する。
+4. Arduino IDEで`src/sketch_avr_dx_unbricker/sketch_avr_dx_unbricker.ino`を開き、搭載したU1/U2に合わせてボードとChipを選択する。
+5. 書き込み装置をSerialUPDIに設定して、U1/U2へファームウェアを書き込む。
+6. 書き込み後、J6を**Target**側へ戻す。
+7. J3へターゲットを接続し、必要に応じてSW2を設定する。(ターゲットへ本基板から給電するならON)
+8. STARTボタンを押してHVパルスを注入する。
+9. Arduino IDEで書き込み装置をSerialUPDIに設定し、通常の書き込みを実行する。
+
+詳細手順は「使用方法」を参照してください。
+
+
+## 安全上の注意
+
+* RESETピンには7.5VのHVパルスが出力されます。ターゲット回路の耐圧・保護回路を必ず確認してください。
+* 外部電源でターゲットを給電している場合は、SW2をOFFにして二重給電を避けてください。
+* HV実行時はJ4を未接続にする構成を推奨します。
+* 初回はターゲット基板ではなく、可能ならチップ単体や最小構成で動作確認してください。
+
+
 ## 回路図
 
-[![schema](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/schema.png)](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/schema.pdf)
+[![schema](images/schema.png)](images/schema.pdf)
 
 
 ## 基板パターン図
 
-![PCB pattern](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/pcb-pattern.png)
+![PCB pattern](images/pcb-pattern.png)
 
 
 ## 部品表
@@ -34,11 +75,11 @@ UPDI部分の回路は[SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/b
 |-----------|----|------|------|
 |C1,C2      |   2|0.1μF| |
 |C3,C4      |   2|1μF  |チャージポンプ用 (\*1) |
-|D1,D3,D4,D8|   1|[BAT43](https://akizukidenshi.com/catalog/g/g113907/) |適当なショットキーバリアダイオード |
+|D1,D3,D4,D8|   4|[BAT43](https://akizukidenshi.com/catalog/g/g113907/) |適当なショットキーバリアダイオード |
 |D2         |   1|LED   |φ5mm |
 |D5         |   1|[1N4737A](https://www.sengoku.co.jp/mod/sgk_cart/detail.php?code=EEHD-0FMV)|7.5Vツェナーダイオード (\*2) |
-|D6         |   1|      |ツェナーダイオード (\*2) |
-|D7         |   1|      |ツェナーダイオード (\*2) |
+|D6         |   1|任意  |ツェナーダイオード (\*2) |
+|D7         |   1|任意  |ツェナーダイオード (\*2) |
 |J1         |   1|      |L型ピンソケット 2x4 (\*3)、AE-CH9102F-TYPEC-BO接続用 |
 |J2         |   1|      |ピンヘッダー 1x6、TTLシリアル入力接続用 |
 |J3         |   1|      |ピンソケット 1x4、UPDI接続用|
@@ -217,9 +258,30 @@ J3は通常は未接続にしますが、接続されていても問題はあり
 J1接続時、J4の6番ピンの機能はJ5にジャンパーピンを挿すことでRTSかDTRのどちらかを選択できます。
 
 
+## トラブルシューティング
+
+### HV後も書き込みできない
+
+* J6が**Target**側になっているか確認する。
+* SW1が**UPDI**側になっているか確認する。
+* 書き込み装置がSerialUPDIになっているか確認する。
+* STARTボタン押下後、時間を空けすぎずに書き込み操作を行う。
+
+### ターゲットが起動しない・不安定
+
+* SW2の設定を確認し、外部給電と重複していないか確認する。
+* GND共通が取れているか確認する。
+* J3配線の向きとピンアサインを再確認する。
+
+### HV電圧が心配
+
+* TP1電圧が7.5V付近 (Vdd+2.0V以上、8.5V以下) になるようD5またはD6+D7を調整する。
+* 初回はチップ単体または最小構成で評価し、問題がないことを確認してから実機に接続する。
+
+
 ## 完成品
 
-[![完成品](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/unbricker-thumb.jpg)](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/unbricker.jpg)
+[![完成品](images/unbricker-thumb.jpg)](images/unbricker.jpg)
 
 
 ## License
@@ -241,6 +303,6 @@ UPDI HVプログラミングに対応したプロジェクトや参考情報へ�
 * [Dlloydev/Updi-Key: This DIY open source hardware connects inline with any UPDI programmer to provide a HV UPDI programming solution for tinyAVR® 0/1/2 series MCUs. Compatible with UPDI programmers that operate with jtag2updi, avrdude, pyupdi, MPLAB X IDE, MPLAB X IPE, PlatformIO and Arduino IDE using any target voltage from 3 to 5V.](https://github.com/Dlloydev/Updi-Key)
 * [Create a 12V version of microUPDI · Issue #3 · MCUdude/microUPDI](https://github.com/MCUdude/microUPDI/issues/3)
 
-### ATtiny / ARV Dx/Ex 両対応
+### ATtiny / AVR Dx/Ex 両対応
 
 * [\[MULTIX UPDI4AVR Programmer\] modernAVR世代専用HV対応プログラム書込器 | 朝日薫 / K.Sato](https://askn37.github.io/product/UPDI4AVR/)
