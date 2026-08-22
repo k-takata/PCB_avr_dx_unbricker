@@ -1,32 +1,34 @@
+[English](README.md) | [日本語](README.ja.md)
+
 # AVR Dx/Ex Unbricker
 
-## 3行サマリ
+## 3-Line Summary
 
-* AVR Dx/Exシリーズ向けの7.5V系HV対応UPDIアンブリッカーです。
-* UPDI無効化デバイスにHVパルスを与えて、通常のUPDI書き込みに復帰させます。
-* ATtinyシリーズ向けの12V系HVプログラミングには対応していません。
+* A 7.5 V HV-capable UPDI unbricker for AVR Dx/Ex series devices.
+* It restores normal UPDI programming by injecting an HV pulse into devices where UPDI was disabled.
+* It does not support 12 V HV programming for ATtiny series devices.
 
-## 概要
+## Overview
 
-AVR Dx/Exシリーズ用の7.5V系高電圧(HV)プログラミングに対応したUPDI (Unified Program and Debug Interface)書き込み装置です。(ATtinyシリーズの12V系HVプログラミングには対応していません。)  
-意図的あるいは事故によりUPDIピンの設定を変更してしまい、通常のUPDI書き込み装置で書き込みができなくなってしまったデバイスに対し、HVパルス(7.5V)を注入することで、再度書き込みができるようにします。
+This is a UPDI (Unified Program and Debug Interface) programmer that supports 7.5 V high-voltage (HV) programming for AVR Dx/Ex series devices. (It does not support 12 V HV programming for ATtiny series devices.)  
+If UPDI pin settings were changed intentionally or accidentally and a normal UPDI programmer can no longer write to the device, this tool injects an HV pulse (7.5 V) to recover UPDI access.
 
-[秋月電子](https://akizukidenshi.com/)の[CH9102F USBシリアル変換モジュールキット Type-C (AE-CH9102F-TYPEC-BO)](https://akizukidenshi.com/catalog/g/g129505/)、または一般的な6pinのシリアルモジュールを接続して使用します。
+Use it with either the [AE-CH9102F-TYPEC-BO CH9102F USB-Serial converter kit](https://akizukidenshi.com/catalog/g/g129505/) from [Akizuki Denshi](https://akizukidenshi.com/), or a common 6-pin serial module.
 
-UPDI部分の回路は[SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/blob/master/UPDI/jtag2updi.md)に従っています。
-
-
-## 対応範囲
-
-| 項目 | 対応状況 | 備考 |
-|------|----------|------|
-| AVR Dx/Exの7.5V HV UPDI | 対応 | RESETピンへHVパルスを印加 |
-| ATtinyの12V HV UPDI | 非対応 | UPDIピンへ12Vパルスを印加する方式 |
-| 通常のUPDI書き込み | 対応 | 書き込み装置はSerialUPDIを使用 |
-| 動作確認済みデバイス | AVR64DD28 | README作成時点 |
+The UPDI section of the circuit follows [SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/blob/master/UPDI/jtag2updi.md).
 
 
-## 使用したソフトウェア
+## Supported Scope
+
+| Item | Status | Notes |
+|------|--------|-------|
+| 7.5 V HV UPDI for AVR Dx/Ex | Supported | HV pulse is applied to RESET pin |
+| 12 V HV UPDI for ATtiny | Not supported | Method that applies 12 V pulse to UPDI pin |
+| Normal UPDI programming | Supported | Use SerialUPDI as programmer |
+| Verified device | AVR64DD28 | As of this README revision |
+
+
+## Software Used
 
 * KiCad 10.0
 * Arduino IDE 2.3.10
@@ -34,252 +36,252 @@ UPDI部分の回路は[SerialUPDI](https://github.com/SpenceKonde/AVR-Guidance/b
   - [megaTinyCore](https://github.com/SpenceKonde/megaTinyCore) 2.6.11
 
 
-## クイックスタート
+## Quick Start
 
-初回のみ、先に本基板側マイコン(U1/U2)へファームウェアを書き込んでください。
+For first-time use only, write firmware to the onboard MCU (U1/U2) first.
 
-1. U1またはU2のどちらか一方を実装する。
-2. J1またはJ2にホスト側シリアルモジュールを接続する。
-3. J6を**FW**側に設定し、SW1を**UPDI**に設定する。
-4. Arduino IDEで`src/sketch_avr_dx_unbricker/sketch_avr_dx_unbricker.ino`を開き、搭載したU1/U2に合わせてボードとChipを選択する。
-5. 書き込み装置をSerialUPDIに設定して、U1/U2へファームウェアを書き込む。
-6. 書き込み後、J6を**Target**側へ戻す。
-7. J3へターゲットを接続し、必要に応じてSW2を設定する。(ターゲットへ本基板から給電するならON)
-8. STARTボタンを押してHVパルスを注入する。
-9. Arduino IDEで書き込み装置をSerialUPDIに設定し、通常の書き込みを実行する。
+1. Populate either U1 or U2.
+2. Connect a host-side serial module to J1 or J2.
+3. Set J6 to **FW** and SW1 to **UPDI**.
+4. In Arduino IDE, open `src/sketch_avr_dx_unbricker/sketch_avr_dx_unbricker.ino`, then select board/chip based on whether U1 or U2 is populated.
+5. Set programmer to SerialUPDI and write firmware to U1/U2.
+6. After flashing, switch J6 back to **Target**.
+7. Connect the target to J3, and set SW2 as needed. (Set ON if this board should power the target.)
+8. Press START to inject the HV pulse.
+9. In Arduino IDE, keep programmer set to SerialUPDI and perform normal programming.
 
-詳細手順は「使用方法」を参照してください。
-
-
-## 安全上の注意
-
-* RESETピンには7.5VのHVパルスが出力されます。ターゲット回路の耐圧・保護回路を必ず確認してください。
-* 外部電源でターゲットを給電している場合は、SW2をOFFにして二重給電を避けてください。
-* HV実行時はJ4を未接続にする構成を推奨します。
-* 初回はターゲット基板ではなく、可能ならチップ単体や最小構成で動作確認してください。
+See "Usage" for full procedures.
 
 
-## 回路図
+## Safety Notes
+
+* A 7.5 V HV pulse is output on RESET. Verify target circuit voltage tolerance and protection first.
+* If the target is externally powered, set SW2 to OFF to avoid double-powering.
+* During HV operation, leaving J4 disconnected is recommended.
+* For initial validation, test with a bare chip or minimal setup rather than a full target board when possible.
+
+
+## Schematic
 
 [![schema](images/schema.png)](images/schema.pdf)
 
 
-## 基板パターン図
+## PCB Pattern
 
 ![PCB pattern](images/pcb-pattern.png)
 
 
-## 部品表
+## Bill of Materials
 
-| Reference |個数|値    | 説明 |
-|-----------|----|------|------|
-|C1,C2      |   2|0.1μF| |
-|C3,C4      |   2|1μF  |チャージポンプ用 (\*1) |
-|D1,D3,D4,D8|   4|[BAT43](https://akizukidenshi.com/catalog/g/g113907/) |適当なショットキーバリアダイオード |
-|D2         |   1|LED   |φ5mm |
-|D5         |   1|[1N4737A](https://www.sengoku.co.jp/mod/sgk_cart/detail.php?code=EEHD-0FMV)|7.5Vツェナーダイオード (\*2) |
-|D6         |   1|任意  |ツェナーダイオード (\*2) |
-|D7         |   1|任意  |ツェナーダイオード (\*2) |
-|J1         |   1|      |L型ピンソケット 2x4 (\*3)、AE-CH9102F-TYPEC-BO接続用 |
-|J2         |   1|      |ピンヘッダー 1x6、TTLシリアル入力接続用 |
-|J3         |   1|      |ピンソケット 1x4、UPDI接続用|
-|J4         |   1|      |[L型ピンソケット 1x6](https://akizukidenshi.com/catalog/g/g109862/)、TTLシリアル出力接続用|
-|J5         |   1|      |ピンヘッダー 1x3、RTS/DTR切り替え用|
-|J6         |   1|      |ピンヘッダー 1x3、書き込み先切り替え用|
-|Q1         |   1|[BSS138](https://akizukidenshi.com/catalog/g/g104232/)|Nch MOSFET|
-|Q2         |   1|[BSS84](https://akizukidenshi.com/catalog/g/g104269/) |Pch MOSFET|
-|R1         |   1|470Ω |黄紫茶金、1/4Wサイズ|
-|R2         |   1|4.7kΩ|黄紫赤金、1/4Wサイズ、LEDに合わせて値は適宜調整|
-|R3         |   1|4.7kΩ|黄紫赤金、1/4Wサイズ|
-|R4,R6      |   2|10kΩ |茶黒橙金、1/4Wサイズ|
-|R5         |   1|100kΩ|茶黒黄金、1/4Wサイズ|
-|SW1,SW2    |   2|[SS-12D00G3](https://akizukidenshi.com/catalog/g/g115707/)|スライドスイッチ 1回路2接点 基板用|
-|SW3        |   1|      |プッシュスイッチ|
-|U1         |   1|[AVR64DD28-I/SP](https://akizukidenshi.com/catalog/g/g118314/)|(\*4)|
-|U2         |   1|[ATtiny402-SS](https://akizukidenshi.com/catalog/g/g130009/)|(\*4)(\*5)|
-|U3         |   1|[TJ7660](https://akizukidenshi.com/catalog/g/g112017/)|ICL7660互換品|
+| Reference | Qty | Value | Description |
+|-----------|-----|-------|-------------|
+| C1,C2     | 2   | 0.1 μF | |
+| C3,C4     | 2   | 1 μF   | For charge pump (\*1) |
+| D1,D3,D4,D8 | 4 | [BAT43](https://akizukidenshi.com/catalog/g/g113907/) | Suitable Schottky barrier diode |
+| D2        | 1   | LED   | 5 mm |
+| D5        | 1   | [1N4737A](https://www.sengoku.co.jp/mod/sgk_cart/detail.php?code=EEHD-0FMV) | 7.5 V Zener diode (\*2) |
+| D6        | 1   | Optional | Zener diode (\*2) |
+| D7        | 1   | Optional | Zener diode (\*2) |
+| J1        | 1   |       | Right-angle pin socket 2x4 (\*3), for AE-CH9102F-TYPEC-BO |
+| J2        | 1   |       | Pin header 1x6, TTL serial input |
+| J3        | 1   |       | Pin socket 1x4, UPDI connection |
+| J4        | 1   |       | [Right-angle pin socket 1x6](https://akizukidenshi.com/catalog/g/g109862/), TTL serial output |
+| J5        | 1   |       | Pin header 1x3, RTS/DTR selection |
+| J6        | 1   |       | Pin header 1x3, destination select |
+| Q1        | 1   | [BSS138](https://akizukidenshi.com/catalog/g/g104232/) | Nch MOSFET |
+| Q2        | 1   | [BSS84](https://akizukidenshi.com/catalog/g/g104269/) | Pch MOSFET |
+| R1        | 1   | 470 Ω | Yellow-Violet-Brown-Gold, 1/4W size |
+| R2        | 1   | 4.7 kΩ | Yellow-Violet-Red-Gold, 1/4W size, adjust for LED as needed |
+| R3        | 1   | 4.7 kΩ | Yellow-Violet-Red-Gold, 1/4W size |
+| R4,R6     | 2   | 10 kΩ | Brown-Black-Orange-Gold, 1/4W size |
+| R5        | 1   | 100 kΩ | Brown-Black-Yellow-Gold, 1/4W size |
+| SW1,SW2   | 2   | [SS-12D00G3](https://akizukidenshi.com/catalog/g/g115707/) | PCB slide switch, SPDT |
+| SW3       | 1   |       | Push switch |
+| U1        | 1   | [AVR64DD28-I/SP](https://akizukidenshi.com/catalog/g/g118314/) | (\*4) |
+| U2        | 1   | [ATtiny402-SS](https://akizukidenshi.com/catalog/g/g130009/) | (\*4)(\*5) |
+| U3        | 1   | [TJ7660](https://akizukidenshi.com/catalog/g/g112017/) | ICL7660 compatible |
 
-(\*1) データシートでは10μFが推奨されているが、電流はほとんど使用しないので、1μFで十分。  
-(\*2) D5を単独で使用するか、D6 + D7の組み合わせで使用する。TP1の電圧が7.5V (Vdd+2.0V以上、8.5V以下)になるようにする。例えば、3.0V + 5.1Vなどの組み合わせでもよいだろう。  
-(\*3) 例えば、[L型ピンソケット 2x6](https://akizukidenshi.com/catalog/g/g116795/) (1個分)や[L型ピンソケット 2x15](https://akizukidenshi.com/catalog/g/g113419/) (3個分)などを加工して使用する。  
-(\*4) U1またはU2のどちらか1つを使用する。  
-(\*5) U2を使用する場合は、ATtiny402を直接載せるか、[SOP8変換基板](https://akizukidenshi.com/catalog/g/g105154)を介して載せるかのどちらかを選択する。  
+(\*1) Datasheet recommends 10 μF, but current draw is minimal, so 1 μF is sufficient.  
+(\*2) Use D5 alone, or D6 + D7 in combination. Adjust so TP1 becomes 7.5 V (at least Vdd + 2.0 V and at most 8.5 V). For example, 3.0 V + 5.1 V is also possible.  
+(\*3) For example, use and trim [Right-angle pin socket 2x6](https://akizukidenshi.com/catalog/g/g116795/) (one piece) or [Right-angle pin socket 2x15](https://akizukidenshi.com/catalog/g/g113419/) (three pieces).  
+(\*4) Use either U1 or U2.  
+(\*5) If using U2, either mount ATtiny402 directly or mount it via an [SOP8 conversion board](https://akizukidenshi.com/catalog/g/g105154).
 
 
-## UPDI HVプログラミングについて
+## About UPDI HV Programming
 
-UPDI (Unified Program and Debug Interface)は、比較的新しいAVRで使われる書き込み方式です。
+UPDI (Unified Program and Debug Interface) is a programming interface used by relatively recent AVR devices.
 
-UPDIには専用のピンを使用しますが、UPDIピンはfuseの設定でGPIOピンに変更することも可能です。しかし、UPDIを無効化してしまうと、次回UPDIで書き込みを行うには特殊な方法でUPDIを有効化する必要があります。そのための方法が高電圧(HV)プログラミングです。
+UPDI normally uses a dedicated pin, but in some devices that pin can be changed to GPIO by fuse settings. If UPDI is disabled, normal UPDI programming is no longer possible until UPDI is re-enabled by a special method. That method is high-voltage (HV) programming.
 
-HVプログラミングには2種類あり、1つはATtinyシリーズで使用されている、UPDIピンに12Vのパルスを与える方式で、もう1つはAVR Dx/Exシリーズで使用されている、RESETピンに7.5Vのパルスを与える方式です。
+There are two HV programming methods: one for ATtiny series that applies a 12 V pulse to the UPDI pin, and one for AVR Dx/Ex series that applies a 7.5 V pulse to the RESET pin.
 
-1. ATtinyシリーズ:  
-   パワーオンリセット(POR)から8.8ms以内にUPDIピンに12Vパルスを与える。  
-   PORから時間内にパルスを与えなければ、ピンの機能と干渉する可能性がある。
-2. AVR Dx/Exシリーズ:  
-   RESETピンに7.5Vパルスを与えてから65ms以内にNVMPROGキーを送出する。  
-   時間内にNVMPROGキーの送出まで終わらなければ、自動的にリセットが掛かる。  
-   ATtinyとは異なり、独立したRESETピンが存在し、出力として使用することはできないので、PORからHVパルスまでの時間的制約はない。
+1. ATtiny series:  
+  Apply a 12 V pulse to UPDI pin within 8.8 ms after power-on reset (POR).  
+   If the pulse is not applied within the timing window, it may interfere with pin function.
+2. AVR Dx/Ex series:  
+  Apply a 7.5 V pulse to RESET pin, then send the NVMPROG key within 65 ms.  
+   If NVMPROG key transmission is not completed within the timing window, the device is automatically reset.  
+   Unlike ATtiny, there is a dedicated RESET pin that cannot be used as output, so there is no POR-to-HV timing constraint.
 
-AVR Dx/Ex Unbrickerは、AVR Dx/ExシリーズのHVプログラミングのみに対応しており、7.5VパルスとNVMPROGキーの送出を行うようになっています。
+AVR Dx/Ex Unbricker supports only AVR Dx/Ex HV programming and performs both the 7.5 V pulse and NVMPROG key transmission.
 
-**参考資料:**
+**References:**
 
 * [ATtiny202/204/402/404/406 Data Sheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/ATtiny202-204-402-404-406-DataSheet-DS40002318A.pdf) [PDF]  
-  "30. UPDI - Unified Program and Debug Interface" や "33. Electrical Characteristics" (33.18. UPDI Timing) などを参照。
+  See "30. UPDI - Unified Program and Debug Interface" and "33. Electrical Characteristics" (33.18. UPDI Timing).
 * [AVR64DD32/28 Datasheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/AVR64DD32-28-Complete-DataSheet-DS40002315.pdf) [PDF]  
-  "34. UPDI - Unified Program and Debug Interface" や "36. Electrical Characteristics" (36.18. UPDI) などを参照。
+  See "34. UPDI - Unified Program and Debug Interface" and "36. Electrical Characteristics" (36.18. UPDI).
 
 
-## 動作確認済みデバイス
+## Verified Device
 
 * AVR64DD28
 
 
-## 使用方法
+## Usage
 
-### 接続
+### Connections
 
-J1をAE-CH9102F-TYPEC-BOと接続します。AE-CH9102F-TYPEC-BOには付属のピンヘッダーではなく、L型ピンヘッダー 2x4を基板表面側に取り付けておきます。
-あるいは、J2に一般的な6pinのTTLシリアルモジュールを接続します。(J1とJ2は排他利用です。)
+Connect J1 to AE-CH9102F-TYPEC-BO. On AE-CH9102F-TYPEC-BO, install a right-angle 2x4 header on the board top side instead of the included straight header.
+Alternatively, connect a common 6-pin TTL serial module to J2. (Use either J1 or J2, not both.)
 
-J3は、[AVR Programming Adapter](https://www.microchip.com/en-us/development-tool/AC31S18A)と同じUPDI v2コネクターとなっています。
+J3 uses the same UPDI v2 connector as the [AVR Programming Adapter](https://www.microchip.com/en-us/development-tool/AC31S18A).
 
-| Pin | 機能       | 色 |
-|-----|------------|----|
-|   1 | RESET      | 白 |
-|   2 | VDD (5V)   | 赤 |
-|   3 | GND        | 黒 |
-|   4 | UPDI       | 緑 |
+| Pin | Function  | Color |
+|-----|-----------|-------|
+| 1   | RESET     | White |
+| 2   | VDD (5 V) | Red   |
+| 3   | GND       | Black |
+| 4   | UPDI      | Green |
 
-RESETピンからは7.5Vのパルスが出力されますので、接続先はそのことを考慮した回路になっている必要があります。
+Because a 7.5 V pulse is output from RESET, the connected target circuit must be designed with that in mind.
 
-J4は、一般的な6pinのTTLシリアルコネクターとなっています。J1接続時、J4の6番ピンの機能はJ5にジャンパーピンを挿すことでRTSかDTRのどちらかを選択できます。(J2接続時、J4の6番ピンはJ2の6番ピンと直結されるため、その機能は使用しているシリアルモジュール次第となります。)
+J4 is a common 6-pin TTL serial connector. When J1 is used, pin 6 on J4 can be switched between RTS and DTR by placing a jumper on J5. (When J2 is used, pin 6 on J4 is directly connected to pin 6 on J2, so behavior depends on the serial module.)
 
-| Pin | 機能       | 色 |
-|-----|------------|----|
-|   1 | GND        | 黒 |
-|   2 | CTS        | 茶 |
-|   3 | VDD (5V)   | 赤 |
-|   4 | TxD        | 橙 |
-|   5 | RxD        | 黄 |
-|   6 | RTS / DTR  | 緑 |
+| Pin | Function   | Color  |
+|-----|------------|--------|
+| 1   | GND        | Black  |
+| 2   | CTS        | Brown  |
+| 3   | VDD (5 V)  | Red    |
+| 4   | TxD        | Orange |
+| 5   | RxD        | Yellow |
+| 6   | RTS / DTR  | Green  |
 
-SW1は、UPDIモードとシリアル通信モードの切り替えスイッチです。シルクのUPDIの側に倒すとUPDIモード(J3使用)、Serialの側に倒すとシリアル通信モード(J4使用)です。
+SW1 switches between UPDI mode and serial communication mode. Move it toward UPDI silk for UPDI mode (J3), and toward Serial silk for serial mode (J4).
 
-SW2は、本アダプターから5Vを供給するかどうかを選択します。シルクのONの側に倒すと5Vを供給し、OFFの側に倒すと供給しません。マイコンに対して別の経路で電源を供給済みの場合はOFFにしてください。
-
-
-### ファームウェアの書き込み
-
-ファームウェアをU1またはU2に書き込むには、スイッチやコネクター類は以下のように設定、あるいは接続します。
-
-|部品 | 設定・接続     |
-|-----|----------------|
-|U1/U2| どちらかを搭載 |
-| SW1 | **UPDI**       |
-| SW2 | 任意           |
-|J1/J2| どちらかを接続 |
-| J3  | 未接続         |
-| J4  | 未接続         |
-| J5  | 任意           |
-| J6  | **FW**         |
-
-Arduino IDEで、srcディレクトリ内のスケッチを開きます。  
-U1/U2のどちらを搭載したかに合わせて、ボードとChipを適切に選択します。
-
-|部品| ボード                                  | Chip      |
-|----|-----------------------------------------|-----------|
-| U1 | DxCore → AVR DD-series (no bootloader) | AVR64DD28 |
-| U2 | megaTinyCore → ATtiny412/402/212/202   | ATtiny402 |
-
-書き込み装置をSerialUPDIに設定して書き込みを行えばファームウェアが書き込まれます。
+SW2 selects whether this adapter supplies 5 V. Move it toward ON silk to supply 5 V, and toward OFF silk to disable supply. If the target MCU is already powered through another path, set OFF.
 
 
-### UPDI書き込み
+### Firmware Flashing
 
-#### 通常モード
+To flash firmware into U1 or U2, use the following setup.
 
-スイッチやコネクター類は以下のように設定、あるいは接続します。
+| Part | Setting / Connection |
+|------|----------------------|
+| U1/U2 | Populate either one |
+| SW1  | **UPDI** |
+| SW2  | Optional |
+| J1/J2 | Connect either one |
+| J3   | Not connected |
+| J4   | Not connected |
+| J5   | Optional |
+| J6   | **FW** |
 
-|部品 | 設定・接続       |
-|-----|------------------|
-| SW1 | **UPDI**         |
-| SW2 | 通常はON         |
-|J1/J2| どちらかを接続   |
-| J3  | ターゲットを接続 |
-| J4  | 通常は未接続     |
-| J5  | 任意             |
-| J6  | **Target**       |
+In Arduino IDE, open the sketch under `src`.  
+Select board and chip based on whether U1 or U2 is populated.
 
-SW2は通常はONにしますが、ターゲットに別経路から電源が供給されている場合はOFFにします。  
-J4は通常は未接続にしますが、接続されていても問題はありません。
+| Part | Board | Chip |
+|------|-------|------|
+| U1 | DxCore -> AVR DD-series (no bootloader) | AVR64DD28 |
+| U2 | megaTinyCore -> ATtiny412/402/212/202 | ATtiny402 |
 
-Arduino IDEから、書き込み装置をSerialUPDIに設定すれば書き込みができます。
-
-
-#### HVプログラミング
-
-スイッチやコネクター類は以下のように設定、あるいは接続します。
-
-|部品 | 設定・接続       |
-|-----|------------------|
-| SW1 | **UPDI**         |
-| SW2 | 通常はON         |
-|J1/J2| どちらかを接続   |
-| J3  | ターゲットを接続 |
-| J4  | 未接続           |
-| J5  | 任意             |
-| J6  | **Target**       |
-
-SW2は通常はONにしますが、ターゲットに別経路から電源が供給されている場合はOFFにします。  
-J3は、ターゲットの回路がHVに対応していれば問題ありませんが、チップ単体で接続する方が安全でしょう。  
-J4は未接続にしておくことを推奨します。
-
-接続した状態で、STARTボタンを押すと、7.5VパルスとNVMPROGキーの送出が行われ、UPDIが有効化されます。そのあとで通常と同様の手順でArduino IDEから書き込み操作を行えば書き込みができるはずです。
+Set programmer to SerialUPDI and upload firmware.
 
 
-### シリアル通信
+### UPDI Programming
 
-スイッチやコネクター類は以下のように設定、あるいは接続します。
+#### Normal Mode
 
-|部品 | 設定・接続       |
-|-----|------------------|
-| SW1 | **Serial**       |
-| SW2 | 通常はON         |
-|J1/J2| どちらかを接続   |
-| J3  | 通常は未接続     |
-| J4  | ターゲットを接続 |
-| J5  | 用途に応じて選択 |
-| J6  | 任意             |
+Use the following setup.
 
-J3は通常は未接続にしますが、接続されていても問題はありません。  
-J1接続時、J4の6番ピンの機能はJ5にジャンパーピンを挿すことでRTSかDTRのどちらかを選択できます。
+| Part | Setting / Connection |
+|------|----------------------|
+| SW1  | **UPDI** |
+| SW2  | Usually ON |
+| J1/J2 | Connect either one |
+| J3   | Connect target |
+| J4   | Usually not connected |
+| J5   | Optional |
+| J6   | **Target** |
 
+SW2 is usually ON, but set OFF if the target is powered from another source.  
+J4 is usually left disconnected, but it may remain connected.
 
-## トラブルシューティング
-
-### HV後も書き込みできない
-
-* J6が**Target**側になっているか確認する。
-* SW1が**UPDI**側になっているか確認する。
-* 書き込み装置がSerialUPDIになっているか確認する。
-* STARTボタン押下後、時間を空けすぎずに書き込み操作を行う。
-
-### ターゲットが起動しない・不安定
-
-* SW2の設定を確認し、外部給電と重複していないか確認する。
-* GND共通が取れているか確認する。
-* J3配線の向きとピンアサインを再確認する。
-
-### HV電圧が心配
-
-* TP1電圧が7.5V付近 (Vdd+2.0V以上、8.5V以下) になるようD5またはD6+D7を調整する。
-* 初回はチップ単体または最小構成で評価し、問題がないことを確認してから実機に接続する。
+In Arduino IDE, set programmer to SerialUPDI and program as usual.
 
 
-## 完成品
+#### HV Programming
+
+Use the following setup.
+
+| Part | Setting / Connection |
+|------|----------------------|
+| SW1  | **UPDI** |
+| SW2  | Usually ON |
+| J1/J2 | Connect either one |
+| J3   | Connect target |
+| J4   | Not connected |
+| J5   | Optional |
+| J6   | **Target** |
+
+SW2 is usually ON, but set OFF if the target is powered from another source.  
+Using J3 with a full target board is fine if the board tolerates HV, but connecting a bare chip is safer.  
+Keeping J4 disconnected is recommended.
+
+With this connection, press START. The 7.5 V pulse and NVMPROG key transmission are performed, and UPDI is re-enabled. After that, use normal Arduino IDE write steps as usual.
+
+
+### Serial Communication
+
+Use the following setup.
+
+| Part | Setting / Connection |
+|------|----------------------|
+| SW1  | **Serial** |
+| SW2  | Usually ON |
+| J1/J2 | Connect either one |
+| J3   | Usually not connected |
+| J4   | Connect target |
+| J5   | Select as needed |
+| J6   | Optional |
+
+J3 is usually left disconnected, but it may remain connected.  
+When J1 is used, pin 6 on J4 can be switched between RTS and DTR by placing a jumper on J5.
+
+
+## Troubleshooting
+
+### Cannot Program Even After HV
+
+* Check that J6 is set to **Target**.
+* Check that SW1 is set to **UPDI**.
+* Check that programmer is set to SerialUPDI.
+* After pressing START, do not wait too long before starting the write operation.
+
+### Target Does Not Boot or Is Unstable
+
+* Check SW2 setting and ensure there is no duplicate power source.
+* Check that GND is shared properly.
+* Re-check J3 wiring direction and pin assignment.
+
+### Concerned About HV Voltage
+
+* Adjust D5 or D6+D7 so TP1 is around 7.5 V (at least Vdd + 2.0 V and at most 8.5 V).
+* For first-time validation, test on a bare chip or minimal setup before connecting a full target system.
+
+
+## Finished Product
 
 [![完成品](images/unbricker-thumb.jpg)](images/unbricker.jpg)
 
@@ -289,13 +291,13 @@ J1接続時、J4の6番ピンの機能はJ5にジャンパーピンを挿すこ�
 CC0
 
 
-## 参考プロジェクト
+## Related Projects
 
-UPDI HVプログラミングに対応したプロジェクトや参考情報へのリンクです。
+Links to projects and references related to UPDI HV programming.
 
-### ATtiny専用
+### ATtiny-Only
 
-12V系HVプログラミングに対応したプロジェクトはかなりたくさんあります。以下はその一部です。（ただし、POR後、規定時間内にHVパルスを与えるようになっているものはあまり多くありません。）
+There are many projects for 12 V HV programming. The list below is only a subset. (However, relatively few are designed to apply the HV pulse within the required timing after POR.)
 
 * [todopapa/UPDI_HV_WRITER-w-RESET: This is a new AVR ATTINY series UPDI programmer with HV pulse injection avility on power on reset timing.](https://github.com/todopapa/UPDI_HV_WRITER-w-RESET)
 * [DIY Arduino Nano HV UPDI Programmer - Electronics-Lab](https://www.electronics-lab.com/diy-arduino-nano-hv-updi-programmer/)
@@ -303,6 +305,6 @@ UPDI HVプログラミングに対応したプロジェクトや参考情報へ�
 * [Dlloydev/Updi-Key: This DIY open source hardware connects inline with any UPDI programmer to provide a HV UPDI programming solution for tinyAVR® 0/1/2 series MCUs. Compatible with UPDI programmers that operate with jtag2updi, avrdude, pyupdi, MPLAB X IDE, MPLAB X IPE, PlatformIO and Arduino IDE using any target voltage from 3 to 5V.](https://github.com/Dlloydev/Updi-Key)
 * [Create a 12V version of microUPDI · Issue #3 · MCUdude/microUPDI](https://github.com/MCUdude/microUPDI/issues/3)
 
-### ATtiny / AVR Dx/Ex 両対応
+### ATtiny / AVR Dx/Ex
 
 * [\[MULTIX UPDI4AVR Programmer\] modernAVR世代専用HV対応プログラム書込器 | 朝日薫 / K.Sato](https://askn37.github.io/product/UPDI4AVR/)
