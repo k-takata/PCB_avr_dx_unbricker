@@ -219,10 +219,8 @@ J1接続時、J4の6番ピンの機能はJ5にジャンパーピンを挿すこ�
 
 ## 完成品
 
-T.B.D.
-<!--
 [![完成品](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/unbricker-thumb.jpg)](https://raw.githubusercontent.com/k-takata/PCB_avr_dx_unbricker/master/images/unbricker.jpg)
--->
+
 
 ## License
 
