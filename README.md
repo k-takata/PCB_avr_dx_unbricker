@@ -93,7 +93,7 @@ AVR Dx/Ex Unbrickerは、AVR Dx/ExシリーズのHVプログラミングのみ�
 
 ## 動作確認済みデバイス
 
-T.B.D.
+* AVR64DD28
 
 
 ## 使用方法
