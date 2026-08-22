@@ -281,6 +281,50 @@ When J1 is used, pin 6 on J4 can be switched between RTS and DTR by placing a ju
 * For first-time validation, test on a bare chip or minimal setup before connecting a full target system.
 
 
+## Critical Issues in DxCore 1.6.2
+
+As of August 2026, the latest release of [DxCore](https://github.com/SpenceKonde/DxCore), version 1.6.2, has critical issues that make AVR DD series devices unusable.
+There are two issues: one causes upload failures with an error, and the other applies an incorrect fuse setting that can disable the UPDI pin.
+
+* [On 1.6.2 upload to AVR64DD14 fails with prog.py: error: unrecognized arguments · Issue #629 · SpenceKonde/DxCore](https://github.com/SpenceKonde/DxCore/issues/629)
+* [Add missing zero-bit in SYSCFG0 for DD-chips by felias-fogg · Pull Request #638 · SpenceKonde/DxCore](https://github.com/SpenceKonde/DxCore/pull/638)
+
+If you fix only the first issue and proceed with writing, the second issue can still disable UPDI programming. This project was created specifically to recover from that situation.
+
+If both issues above are fixed, DxCore 1.6.2 can be used normally with AVR DD series devices.
+
+On Windows, go to `C:\Users\<USERNAME>\AppData\Local\Arduino15\packages\DxCore\hardware\megaavr\1.6.2` and apply the following changes to `boards.txt`.
+
+```diff
+--- boards.txt.orig
++++ boards.txt
+@@ -1209,7 +1209,7 @@
+ avrdd.bootloader.wdttimeotbits=0000
+ avrdd.bootloader.BODCFG=0b{bootloader.bodlevbits}{bootloader.bodmodebits}
+ avrdd.bootloader.updipinbit=1
+-avrdd.bootloader.SYSCFG0=0b110{bootloader.updipinbit}{bootloader.resetpinbit}0{bootloader.eesavebit}
++avrdd.bootloader.SYSCFG0=0b110{bootloader.updipinbit}{bootloader.resetpinbit}00{bootloader.eesavebit}
+ avrdd.bootloader.SYSCFG1=0b000{bootloader.mviobits}{bootloader.sutbits}
+ avrdd.bootloader.CODESIZE=0x00
+ avrdd.bootloader.BOOTSIZE=0x01
+@@ -1227,8 +1227,8 @@
+ avrdd.upload.maximum_data_size=0
+ # The maximum size and data size attributes are overridden by the selected chip. If you are avoiding specifying that somehow, there is no hope of anything working, so don't do that.
+ # Each top-level entry supports at least a dozen parts with varying memory constraints.
+-avrdd.program.serupdifuse5="-Ufuse5:w:{bootloader.SYSCFG0}:m"
+-avrdd.program.avrdudefuse5=5:{bootloader.SYSCFG0}
++avrdd.program.avrdudefuse5="-Ufuse5:w:{bootloader.SYSCFG0}:m"
++avrdd.program.serupdifuse5=5:{bootloader.SYSCFG0}
+ 
+ 
+ #----------------------------------------#
+```
+
+This fix will be overwritten when DxCore is updated or reinstalled via Boards Manager, so you must reapply it in those cases.
+
+If you need new features in DxCore 1.6.x (for example, AVR DU series support), use this workaround until a fixed release is available. If you do not need those features, using DxCore 1.5.11 is recommended.
+
+
 ## Finished Product
 
 [![完成品](images/unbricker-thumb.jpg)](images/unbricker.jpg)

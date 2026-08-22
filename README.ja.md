@@ -281,6 +281,50 @@ J1接続時、J4の6番ピンの機能はJ5にジャンパーピンを挿すこ�
 * 初回はチップ単体または最小構成で評価し、問題がないことを確認してから実機に接続する。
 
 
+## DxCore 1.6.2に関する致命的な問題
+
+2026年8月時点の[DxCore](https://github.com/SpenceKonde/DxCore)の最新版である1.6.2には、AVR DDシリーズで使えないという致命的な問題があります。
+問題は2つあり、1つはエラーが発生して書き込みできないというもので、もう1つはfuseの設定が間違っていてUPDIピンが無効化されてしまうというものです。
+
+* [On 1.6.2 upload to AVR64DD14 fails with prog.py: error: unrecognized arguments · Issue #629 · SpenceKonde/DxCore](https://github.com/SpenceKonde/DxCore/issues/629)
+* [Add missing zero-bit in SYSCFG0 for DD-chips by felias-fogg · Pull Request #638 · SpenceKonde/DxCore](https://github.com/SpenceKonde/DxCore/pull/638)
+
+1つ目の問題だけを直して書き込みを行うと、2つ目の問題により、UPDIでの書き込みができなくなってしまいます。今回このプロジェクトを立てたのは、まさにこの問題に対処するためでした。
+
+上記2点を両方修正すれば、AVR DDシリーズでも問題なくDxCore 1.6.2が使えるようになります。
+
+具体的には、Windowsであれば、`C:\Users\<USERNAME>\AppData\Local\Arduino15\packages\DxCore\hardware\megaavr\1.6.2` に移動し、`boards.txt` に以下の変更を加えれば良いです。
+
+```diff
+--- boards.txt.orig
++++ boards.txt
+@@ -1209,7 +1209,7 @@
+ avrdd.bootloader.wdttimeotbits=0000
+ avrdd.bootloader.BODCFG=0b{bootloader.bodlevbits}{bootloader.bodmodebits}
+ avrdd.bootloader.updipinbit=1
+-avrdd.bootloader.SYSCFG0=0b110{bootloader.updipinbit}{bootloader.resetpinbit}0{bootloader.eesavebit}
++avrdd.bootloader.SYSCFG0=0b110{bootloader.updipinbit}{bootloader.resetpinbit}00{bootloader.eesavebit}
+ avrdd.bootloader.SYSCFG1=0b000{bootloader.mviobits}{bootloader.sutbits}
+ avrdd.bootloader.CODESIZE=0x00
+ avrdd.bootloader.BOOTSIZE=0x01
+@@ -1227,8 +1227,8 @@
+ avrdd.upload.maximum_data_size=0
+ # The maximum size and data size attributes are overridden by the selected chip. If you are avoiding specifying that somehow, there is no hope of anything working, so don't do that.
+ # Each top-level entry supports at least a dozen parts with varying memory constraints.
+-avrdd.program.serupdifuse5="-Ufuse5:w:{bootloader.SYSCFG0}:m"
+-avrdd.program.avrdudefuse5=5:{bootloader.SYSCFG0}
++avrdd.program.avrdudefuse5="-Ufuse5:w:{bootloader.SYSCFG0}:m"
++avrdd.program.serupdifuse5=5:{bootloader.SYSCFG0}
+ 
+ 
+ #----------------------------------------#
+```
+
+この修正は、ボードマネージャでDxCoreを更新したり再インストールすると上書きされてしまうため、そのような場合には修正を再適用する必要があります。
+
+DxCore 1.6.xの新機能（例えばAVR DUシリーズへの対応）が必要なのであれば、修正版がリリースされるまではこの方法で対処してください。新機能が不要であれば、DxCore 1.5.11を使う方がお勧めです。
+
+
 ## 完成品
 
 [![完成品](images/unbricker-thumb.jpg)](images/unbricker.jpg)
